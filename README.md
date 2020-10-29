@@ -9,5 +9,5 @@ Host文件修改工具，可以非常直观的进行修改Hosts文件。
 上述两个功能也是我们最常用的。
 
 ## 软件截图：
-- ![1.jpg](readme/1.jpg)
+![1.jpg](https://github.com/meiqiyun/HostsFileUpdateTool/blob/master/readme/1.jpg)
 - ![2.jpg](readme/2.jpg)
