@@ -14,9 +14,9 @@ namespace Hosts修改工具
 {
     public partial class FrmMian : Form
     {
-        //设置为公共窗体
+        //定义公共窗体
         public static FrmMian frmMain;
-        //保存域名和IP的集合
+        //保存Hosts类的集合
         List<Hosts> hostList = new List<Hosts>();
 
         public FrmMian()
@@ -54,7 +54,8 @@ namespace Hosts修改工具
         private void btnAdd_Click(object sender, EventArgs e)
         {
             FrmAdd fa = new FrmAdd();
-            frmMain = this;//指定为公共窗体
+            //指定为公共窗体
+            frmMain = this;
             fa.ShowDialog();
         }
 
@@ -65,43 +66,41 @@ namespace Hosts修改工具
         {
             //先清空
             hostList.Clear();
-            //1.创建文件流
-            string path = "host.txt";
-            FileStream fs = new FileStream(path, FileMode.OpenOrCreate);
-            //2.创建读取器
-            StreamReader sr = new StreamReader(fs, Encoding.UTF8);
-            //3.开始分割内容，保存到临时数组中
-            string content = sr.ReadToEnd().Trim();//读取内容        
+            this.listView1.Items.Clear();
             try
             {
-                if (string.IsNullOrEmpty(content))
-                    return;
-                //先以换行分割
-                string[] temps = content.Trim().Split(new string[] { "\r\n" }, StringSplitOptions.None);
-                foreach (var item in temps)
+                using (FileStream fs = new FileStream(@"host.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
                 {
-                    string[] arr = item.Split(' ');
-                    Hosts hosts = new Hosts(arr[0], arr[1]);
-                    hostList.Add(hosts);
-                }
-                ShowListView();
-            }
-            finally
-            {
-                //4.关闭读取器
-                if (sr != null)
+                    //创建读取器
+                    StreamReader sr = new StreamReader(fs, Encoding.UTF8);
+                    //开始分割内容，保存到临时数组中
+                    string content = sr.ReadToEnd().Trim();//读取内容 
+                    if (string.IsNullOrEmpty(content))
+                        return;
+                    //先以换行分割
+                    string[] temps = content.Split(new string[] { "\r\n" }, StringSplitOptions.None);
+                    foreach (var item in temps)
+                    {
+                        //以空格分割
+                        string[] arr = item.Split(' ');
+                        Hosts hosts = new Hosts(arr[0], arr[1]);
+                        hostList.Add(hosts);
+                    }
+                    ShowListView();
+                    //关闭
                     sr.Close();
-                //5.关闭文件流
-                if (fs != null)
-                    fs.Close();
+                    //释放资源
+                    sr.Dispose();
+                }
             }
-
+            catch (Exception ex)
+            {
+                MessageBox.Show("读取host.txt文件失败，异常：" + ex.Message);
+            }
         }
 
         private void ShowListView()
-        {
-            //先清空listView控件
-            this.listView1.Items.Clear();
+        {          
             int num = 1;
             foreach (Hosts hosts in hostList)
             {
@@ -129,7 +128,7 @@ namespace Hosts修改工具
             byte[] obj = (byte[])Hosts修改工具.Properties.Resources.ResourceManager.GetObject("skin");
             se.SkinStream = new MemoryStream(obj);
             this.txtPath.Text = @"C:\WINDOWS\system32\drivers\etc\hosts";
-            //加载信息列表
+            //加载列表
             LoadHostList();
 
         }
@@ -143,53 +142,36 @@ namespace Hosts修改工具
                 this.txtPath.Focus();
                 return;
             }
-            //通常情况下这个文件是只读的，所以写入之前要取消只读
-            File.SetAttributes(path, File.GetAttributes(path) & (~FileAttributes.ReadOnly));//取消只读
-            //1.创建文件流
-            FileStream fs = new FileStream(path, FileMode.Append);
-            //2.创建写入器
-            StreamWriter sw = new StreamWriter(fs, Encoding.UTF8);
-            //3.开始写入
-            bool result = false;//标识是否写入成功
+            //通常情况下Hosts文件是只读的，所以写入之前要取消只读
+            File.SetAttributes(path, File.GetAttributes(path) & (~FileAttributes.ReadOnly));
             try
             {
-                foreach (var host in hostList)
+                using (FileStream fs = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
                 {
-                    StringBuilder sb = new StringBuilder();
-                    sb.Append(host.Ip);
-                    sb.Append(" ");
-                    sb.Append(host.Domain);
-                    sw.WriteLine(sb.ToString());
-                }
-                result = true;
-            }
-            catch (Exception)
-            {
-                result = false;
-            }
-            finally
-            {
-                //4.关闭写入器
-                if (sw != null)
-                {
+                    StreamWriter sw = new StreamWriter(fs, Encoding.UTF8);
+                    //开始写入
+                    foreach (var host in hostList)
+                    {
+                        StringBuilder sb = new StringBuilder();
+                        sb.Append(host.Ip);
+                        sb.Append(" ");
+                        sb.Append(host.Domain);
+                        sw.WriteLine(sb.ToString());
+                    }
+                    //关闭
                     sw.Close();
-                }
-                //5.关闭文件流
-                if (fs != null)
-                {
-                    fs.Close();
-                }
+                    //释放资源
+                    sw.Dispose();
+                }               
             }
-            if (result == true)
+            catch (Exception ex)
             {
-                MessageBox.Show("写入成功");
-                File.SetAttributes(path, File.GetAttributes(path) | FileAttributes.ReadOnly);//设置只读
-            }
-            else
-            {
-                MessageBox.Show("写入失败");
+                MessageBox.Show("写入Hosts失败，异常：" + ex.Message);
                 return;
             }
+            MessageBox.Show("写入Hosts成功");
+            //设置只读
+            File.SetAttributes(path, File.GetAttributes(path) | FileAttributes.ReadOnly);
         }
 
         private void btnDefault_Click(object sender, EventArgs e)
@@ -201,109 +183,77 @@ namespace Hosts修改工具
                 this.txtPath.Focus();
                 return;
             }
-
-            //通常情况下这个文件是只读的，所以写入之前要取消只读
+            //通常情况下Hosts文件是只读的，所以写入之前要取消只读
             string[] allLine = File.ReadAllLines(path);
-            //这里添加处理代码
-            File.SetAttributes(path, File.GetAttributes(path) & (~FileAttributes.ReadOnly));//取消只读
-
-            //1.创建文件流
-            FileStream fs = new FileStream(path, FileMode.Create);
-            //2.创建写入器
-            StreamWriter sw = new StreamWriter(fs, Encoding.UTF8);
-            //3.开始写入
-
-            bool result = false;//标识是否写入成功
+            File.SetAttributes(path, File.GetAttributes(path) & (~FileAttributes.ReadOnly));
             try
             {
-                sw.WriteLine("# Copyright (c) 1993-2009 Microsoft Corp.");
-                sw.WriteLine("#");
-                sw.WriteLine("# This is a sample HOSTS file used by Microsoft TCP/IP for Windows.");
-                sw.WriteLine("#");
-                sw.WriteLine("# This file contains the mappings of IP addresses to host names. Each");
-                sw.WriteLine("# entry should be kept on an individual line. The IP address should");
-                sw.WriteLine("# be placed in the first column followed by the corresponding host name.");
-                sw.WriteLine("# The IP address and the host name should be separated by at least one");
-                sw.WriteLine("# space.");
-                sw.WriteLine("#");
-                sw.WriteLine("# Additionally, comments (such as these) may be inserted on individual");
-                sw.WriteLine("# lines or following the machine name denoted by a '#' symbol.");
-                sw.WriteLine("#");
-                sw.WriteLine("# For example:");
-                sw.WriteLine("#");
-                sw.WriteLine("#      102.54.94.97     rhino.acme.com          # source server");
-                sw.WriteLine("#       38.25.63.10     x.acme.com              # x client host");
-                sw.WriteLine("# localhost name resolution is handled within DNS itself.");
-                sw.WriteLine("");
-                sw.WriteLine("#	127.0.0.1       localhost");
-                sw.WriteLine("#	::1             localhost");
-
-                result = true;
+                using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+                {
+                    StreamWriter sw = new StreamWriter(fs, Encoding.UTF8);
+                    //开始写入
+                    sw.WriteLine("# Copyright (c) 1993-2009 Microsoft Corp.");
+                    sw.WriteLine("#");
+                    sw.WriteLine("# This is a sample HOSTS file used by Microsoft TCP/IP for Windows.");
+                    sw.WriteLine("#");
+                    sw.WriteLine("# This file contains the mappings of IP addresses to host names. Each");
+                    sw.WriteLine("# entry should be kept on an individual line. The IP address should");
+                    sw.WriteLine("# be placed in the first column followed by the corresponding host name.");
+                    sw.WriteLine("# The IP address and the host name should be separated by at least one");
+                    sw.WriteLine("# space.");
+                    sw.WriteLine("#");
+                    sw.WriteLine("# Additionally, comments (such as these) may be inserted on individual");
+                    sw.WriteLine("# lines or following the machine name denoted by a '#' symbol.");
+                    sw.WriteLine("#");
+                    sw.WriteLine("# For example:");
+                    sw.WriteLine("#");
+                    sw.WriteLine("#      102.54.94.97     rhino.acme.com          # source server");
+                    sw.WriteLine("#       38.25.63.10     x.acme.com              # x client host");
+                    sw.WriteLine("# localhost name resolution is handled within DNS itself.");
+                    sw.WriteLine("");
+                    sw.WriteLine("#	127.0.0.1       localhost");
+                    sw.WriteLine("#	::1             localhost");
+                    //关闭
+                    sw.Close();
+                    //释放资源
+                    sw.Dispose();
+                }
+                
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
-                result = false;
-            }
-            finally
-            {
-                //4.关闭写入器
-                if (sw != null)
-                    sw.Close();
-                //5.关闭文件流
-                if (fs != null)
-                    fs.Close();
-            }
-            if (result == true)
-            {
-                MessageBox.Show("还原成功");
-                File.SetAttributes(path, File.GetAttributes(path) | FileAttributes.ReadOnly);//设置只读
-            }
-            else
-            {
-                MessageBox.Show("还原失败");
+                MessageBox.Show("还原Hosts失败，异常：" + ex.Message);
                 return;
             }
+            MessageBox.Show("还原Hosts成功");
+            //设置为只读
+            File.SetAttributes(path, File.GetAttributes(path) | FileAttributes.ReadOnly);
         }
-        //清空列表
+       
+        /// <summary>
+        /// 清空列表
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void tsmiClear_Click(object sender, EventArgs e)
         {
-            //1.创建文件流
-            string path = "host.txt";
-            FileStream fs = new FileStream(path, FileMode.Create);
-            //2.创建写入器
-            StreamWriter sw = new StreamWriter(fs, Encoding.UTF8);
-            //3.开始写入
-            bool result = false;//标识是否写入成功
+            FileStream fs = null;
             try
             {
-                sw.Write("");
-                result = true;
+                fs = new FileStream(@"host.txt", FileMode.Truncate, FileAccess.ReadWrite, FileShare.ReadWrite);            
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                result = false;
+                MessageBox.Show("列表清空失败，异常：" + ex.Message);
+                return;
             }
             finally
             {
-                //4.关闭写入器
-                if (sw != null)
-                    sw.Close();
-                //5.关闭文件流
-                if (fs != null)
-                    fs.Close();
+                fs.Close();
             }
-            if (result)
-            {
-                MessageBox.Show("已全部清空");
-                //清空
-                hostList.Clear();
-                listView1.Clear();            
-            }
-            else
-            {
-                MessageBox.Show("清空失败");
-            }
+            //重新加载
+            LoadHostList();
+            MessageBox.Show("列表已清空");        
         }
 
         private void txtPath_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -314,7 +264,6 @@ namespace Hosts修改工具
             {
                 return;
             }
-            //System.Diagnostics.Process.Start(v_OpenFilePath);
             //以记事本（指定程序）打开外部文档（指定文档）
             System.Diagnostics.Process.Start("notepad.exe", v_OpenFilePath);
         }
@@ -326,16 +275,18 @@ namespace Hosts修改工具
 
     }
     /// <summary>
-    /// Hosts类
+    /// 自定义一个Hosts类
     /// </summary>
     public class Hosts
     {
+        //IP
         string ip;
         public string Ip
         {
             get { return ip; }
             set { ip = value; }
         }
+        //域名
         string domain;
         public string Domain
         {
