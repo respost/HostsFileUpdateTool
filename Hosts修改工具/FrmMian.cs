@@ -77,8 +77,10 @@ namespace Hosts修改工具
                     string content = sr.ReadToEnd().Trim();//读取内容 
                     if (string.IsNullOrEmpty(content))
                         return;
-                    //先以换行分割
-                    string[] temps = content.Split(new string[] { "\r\n" }, StringSplitOptions.None);
+                    //先把换行替换成逗号
+                    content = content.Replace("\r\n", ",");
+                    //再以逗号分割
+                    string[] temps = content.Split(new string[] { "," }, StringSplitOptions.None);
                     foreach (var item in temps)
                     {
                         //以空格分割
@@ -153,10 +155,10 @@ namespace Hosts修改工具
                     foreach (var host in hostList)
                     {
                         StringBuilder sb = new StringBuilder();
-                        sb.Append(host.Ip);
+                        sb.Append("\r\n" + host.Ip);
                         sb.Append(" ");
                         sb.Append(host.Domain);
-                        sw.WriteLine(sb.ToString());
+                        sw.Write(sb.ToString());
                     }
                     //关闭
                     sw.Close();

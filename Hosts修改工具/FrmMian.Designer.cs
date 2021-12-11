@@ -118,13 +118,13 @@
             // 
             this.labelUrl.AutoSize = true;
             this.labelUrl.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.labelUrl.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.labelUrl.ForeColor = System.Drawing.Color.Maroon;
-            this.labelUrl.Location = new System.Drawing.Point(60, 249);
+            this.labelUrl.Font = new System.Drawing.Font("字魂35号-经典雅黑", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.labelUrl.ForeColor = System.Drawing.Color.LightGray;
+            this.labelUrl.Location = new System.Drawing.Point(25, 246);
             this.labelUrl.Name = "labelUrl";
-            this.labelUrl.Size = new System.Drawing.Size(392, 16);
+            this.labelUrl.Size = new System.Drawing.Size(462, 24);
             this.labelUrl.TabIndex = 1;
-            this.labelUrl.Text = "开发赞助商：资源驿站（www.zy13.net），点击访问。";
+            this.labelUrl.Text = "开发团队：美奇软件开发工作室   QQ：15577969";
             this.labelUrl.Click += new System.EventHandler(this.labelUrl_Click);
             // 
             // listView1

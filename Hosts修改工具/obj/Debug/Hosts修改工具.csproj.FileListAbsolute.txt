@@ -25,3 +25,13 @@ E:\北大青鸟\C#\Hosts修改工具\Hosts修改工具\obj\Debug\Hosts修改工�
 E:\北大青鸟\C#\Hosts修改工具\Hosts修改工具\obj\Debug\Hosts修改工具.FrmMian.resources
 E:\北大青鸟\C#\Hosts修改工具\Hosts修改工具\obj\Debug\Hosts修改工具.Properties.Resources.resources
 E:\北大青鸟\C#\Hosts修改工具\Hosts修改工具\obj\Debug\Hosts修改工具.csproj.GenerateResource.Cache
+E:\C#\HostsFileUpdateTool\Hosts修改工具\bin\Debug\Hosts修改工具.exe.config
+E:\C#\HostsFileUpdateTool\Hosts修改工具\bin\Debug\Hosts修改工具.exe
+E:\C#\HostsFileUpdateTool\Hosts修改工具\bin\Debug\Hosts修改工具.pdb
+E:\C#\HostsFileUpdateTool\Hosts修改工具\bin\Debug\IrisSkin4.dll
+E:\C#\HostsFileUpdateTool\Hosts修改工具\obj\Debug\Hosts修改工具.FrmAdd.resources
+E:\C#\HostsFileUpdateTool\Hosts修改工具\obj\Debug\Hosts修改工具.FrmMian.resources
+E:\C#\HostsFileUpdateTool\Hosts修改工具\obj\Debug\Hosts修改工具.Properties.Resources.resources
+E:\C#\HostsFileUpdateTool\Hosts修改工具\obj\Debug\Hosts修改工具.csproj.GenerateResource.Cache
+E:\C#\HostsFileUpdateTool\Hosts修改工具\obj\Debug\Hosts修改工具.exe
+E:\C#\HostsFileUpdateTool\Hosts修改工具\obj\Debug\Hosts修改工具.pdb

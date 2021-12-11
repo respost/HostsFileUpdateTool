@@ -66,7 +66,7 @@ namespace Hosts修改工具
                 return;
             }
             MessageBox.Show("添加成功");
-            this.txtDomain.Text = "";
+            //this.txtDomain.Text = "";
             FrmMian.frmMain.LoadHostList();
         }
         /// <summary>
